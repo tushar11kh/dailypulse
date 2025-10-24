@@ -1,3 +1,4 @@
+// lib/pages/auth/signup_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
@@ -56,10 +57,32 @@ class _SignupPageState extends State<SignupPage> {
     return null;
   }
 
+  void _showSnack(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<void> _handleSignUp() async {
+    final validationError = _validateForm();
+    if (validationError != null) {
+      _showSnack(validationError);
+      return;
+    }
+
+    final auth = context.read<AuthProvider>();
+    setState(() => _isLoading = true);
+    final error = await auth.signUp(_emailController.text.trim(), _passwordController.text.trim());
+    setState(() => _isLoading = false);
+
+    if (error != null) {
+      _showSnack(error);
+    } else {
+      // On successful signup, simply pop back to login (or keep them logged in)
+      Navigator.pop(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final auth = context.read<AuthProvider>();
-
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -67,10 +90,7 @@ class _SignupPageState extends State<SignupPage> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                const Text(
-                  'Create Account', 
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)
-                ),
+                const Text('Create Account', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 20),
                 TextField(
                   controller: _emailController,
@@ -90,14 +110,8 @@ class _SignupPageState extends State<SignupPage> {
                     hintText: 'Enter your password',
                     prefixIcon: const Icon(Icons.lock),
                     suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
+                      icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
+                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
                 ),
@@ -110,14 +124,8 @@ class _SignupPageState extends State<SignupPage> {
                     hintText: 'Confirm your password',
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscureConfirmPassword = !_obscureConfirmPassword;
-                        });
-                      },
+                      icon: Icon(_obscureConfirmPassword ? Icons.visibility : Icons.visibility_off),
+                      onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
                     ),
                   ),
                 ),
@@ -125,32 +133,8 @@ class _SignupPageState extends State<SignupPage> {
                 _isLoading
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
-                        onPressed: () async {
-                          final validationError = _validateForm();
-                          if (validationError != null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(validationError))
-                            );
-                            return;
-                          }
-
-                          setState(() => _isLoading = true);
-                          final error = await auth.signUp(
-                            _emailController.text.trim(),
-                            _passwordController.text.trim(),
-                          );
-                          setState(() => _isLoading = false);
-                          if (error != null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(error))
-                            );
-                          } else {
-                            Navigator.pop(context);
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 48),
-                        ),
+                        onPressed: _handleSignUp,
+                        style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 48)),
                         child: const Text('Sign Up'),
                       ),
                 const SizedBox(height: 16),
