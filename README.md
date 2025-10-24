@@ -113,7 +113,7 @@ This mapping powers all insights, including:
 
 ## Screenshots
 
-[Add screenshots here]
+Click [here](https://www.youtube.com/shorts/PWNZmKvaUx8) to see video demo.
 
 ***
 
