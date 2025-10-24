@@ -13,7 +13,6 @@ class CalendarPage extends StatefulWidget {
 }
 
 class _CalendarPageState extends State<CalendarPage> {
-  List<MoodEntry> _selectedEntries = [];
   int? _selectedDay;
 
   @override
@@ -53,27 +52,24 @@ class _CalendarPageState extends State<CalendarPage> {
   String _prettyDate(DateTime d) => '${_monthName(d.month)} ${d.day}, ${d.year}';
 
   @override
-  Widget build(BuildContext context) {
-    final provider = context.watch<MoodProvider>();
-    final entries = provider.entries;
-    final now = DateTime.now();
-    final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+Widget build(BuildContext context) {
+  final provider = context.watch<MoodProvider>();
+  final entries = provider.entries;
+  final now = DateTime.now();
+  final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
 
-    // Build a map for quick access if needed (not required for multi-entry logic)
-    final mapByDay = <int, List<MoodEntry>>{};
-    for (var e in entries) {
-      if (e.date.year == now.year && e.date.month == now.month) {
-        mapByDay.putIfAbsent(e.date.day, () => []).add(e);
-      }
+  // Build map by day for the current month from the provider entries
+  final mapByDay = <int, List<MoodEntry>>{};
+  for (var e in entries) {
+    if (e.date.year == now.year && e.date.month == now.month) {
+      mapByDay.putIfAbsent(e.date.day, () => []).add(e);
     }
+  }
 
-    // Update selected entries whenever provider data changes or selected day is set
-    if (_selectedDay != null) {
-      _selectedEntries = entries.where((e) =>
-          e.date.year == now.year && 
-          e.date.month == now.month && 
-          e.date.day == _selectedDay).toList();
-    }
+  // Compute selected entries fresh from provider each build
+  final selectedEntries = (_selectedDay != null)
+      ? (mapByDay[_selectedDay!] ?? [])
+      : <MoodEntry>[];
 
     return SingleChildScrollView(
       child: Padding(
@@ -103,8 +99,6 @@ class _CalendarPageState extends State<CalendarPage> {
                       // update local map/selection
                       setState(() {
                         _selectedDay = today.day;
-                        _selectedEntries = mapByDay[today.day] ?? [];
-                        // after adding provider.notifyListeners() already called; rebuild will update.
                       });
                     }
                   },
@@ -188,9 +182,9 @@ class _CalendarPageState extends State<CalendarPage> {
 
             // Show list of entries for selected day (or 'No entries' message)
             if (_selectedDay != null)
-              _selectedEntries.isNotEmpty
+               selectedEntries.isNotEmpty
                   ? Column(
-                      children: _selectedEntries.map((e) {
+                      children:  selectedEntries.map((e) {
                         // Only show time if not exactly 00:00
                         final hasNonZeroTime = !(e.date.hour == 0 && e.date.minute == 0);
 
@@ -231,8 +225,7 @@ class _CalendarPageState extends State<CalendarPage> {
                               if (entry != null) {
                                 await provider.addEntry(entry);
                                 setState(() {
-                                  _selectedEntries = entries.where((e) =>
-                                      e.date.year == date.year && e.date.month == date.month && e.date.day == date.day).toList();
+                                  _selectedDay = date.day;
                                 });
                               }
                             },

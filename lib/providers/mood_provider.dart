@@ -53,21 +53,37 @@ class MoodProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addEntry(MoodEntry entry) async {
-    if (_user == null) return;
+  
+Future<void> addEntry(MoodEntry entry) async {
+  if (_user == null) return;
 
-    _entries.insert(0, entry);
+  // Update in-memory first and notify so UI updates instantly
+  _entries.insert(0, entry);
+  notifyListeners();
+
+  // Save in background (await to keep same API semantics)
+  try {
     await _save();
-    notifyListeners();
+  } catch (e) {
+    // optionally handle save errors (e.g., rollback or show notification)
+    debugPrint('Error saving entries: $e');
   }
+}
 
   Future<void> deleteEntry(String id) async {
-    if (_user == null) return;
+  if (_user == null) return;
 
-    _entries.removeWhere((e) => e.id == id);
+  // Remove in-memory and notify immediately
+  _entries.removeWhere((e) => e.id == id);
+  notifyListeners();
+
+  // Save changes to persistence
+  try {
     await _save();
-    notifyListeners();
+  } catch (e) {
+    debugPrint('Error saving after delete: $e');
   }
+}
 
   Future<void> _save() async {
     final encoded = _entries.map((e) => e.encode()).toList();
