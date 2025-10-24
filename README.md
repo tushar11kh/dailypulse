@@ -1,5 +1,13 @@
 # 🌿 DailyPulse – A Personal Wellness Tracker App
 
+## Demo
+
+Click [here](https://www.youtube.com/watch?v=LtFV55UYTcA) to see video demo(latest updated app on ios).
+
+Click [here](https://www.youtube.com/shorts/PWNZmKvaUx8) to see video demo.
+
+***
+
 DailyPulse is a beautifully minimal Flutter mobile app designed to help users stay mindful of their emotional well-being.  
 In a world full of noise, deadlines, and digital distractions, DailyPulse encourages users to pause for a moment and reflect on how they’re truly feeling each day.
 
@@ -110,12 +118,6 @@ This mapping powers all insights, including:
 - Bottom navigation for intuitive multi-page flow (Calendar -  Trends -  Summary -  Profile).
 - Dark mode support for late-night journaling comfort.
 - Smooth transitions to create a mindful, non-intrusive user experience.
-
-## Screenshots
-
-Click [here](https://www.youtube.com/shorts/PWNZmKvaUx8) to see video demo.
-
-***
 
 ## 🔒 Data Handling
 
